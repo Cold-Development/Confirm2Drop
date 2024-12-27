@@ -2,7 +2,7 @@
 
 **Confirm2Drop** is a lightweight Minecraft plugin that protects players from accidentally dropping valuable items. Players are prompted to confirm drops for items listed in the configurable blacklist, ensuring they don’t lose important gear.
 
-## Features
+## 📦 Features
 
 - Drop confirmation for tools, armor, spawn eggs, and enchanted items.
 - Fully customizable blacklist in `config.yml`.
@@ -11,7 +11,7 @@
 - Configurable timeout for confirmation requests.
 - Compatible with recent Minecraft versions (API 1.20).
 
-### Video showcase 
+### 📺 Video showcase 
 <details>
   <summary>Click to reveal the video</summary>
 
@@ -34,14 +34,14 @@
 
 ---
 
-### How Permissions Work
+### ❓ How Permissions Work
 By default, you don't need to set any permissions. This plugin is ready out of the box.
 - **`confirm2drop.*`**: A master permission for all commands and features. This is useful for server administrators.
 - **`confirm2drop.toggle`**: Lets players enable or disable drop confirmation for themselves.
 - **`confirm2drop.reload`**: Reserved for administrators to reload the plugin's configuration.
 - **`confirm2drop.version`**: Allows checking the plugin's version. Intended for administrators.
 
-### Commands
+### 💻 Commands
 
 | Command                  | Description                                         | Permission              |
 |--------------------------|-----------------------------------------------------|-------------------------|
@@ -51,13 +51,13 @@ By default, you don't need to set any permissions. This plugin is ready out of t
 
 ---
 
-### How Commands Work
+### ❓ How Commands Work
 
 - **`/confirm2drop toggle`**: Lets players enable or disable drop confirmation for themselves.
 - **`/confirm2drop reload`**: Used by administrators to reload the plugin's configuration and locale files without restarting the server.
 - **`/confirm2drop version`**: Displays the plugin version, useful for debugging or support.
 
-## Configuration
+## ⚙ Configuration
 
 ### Example `config.yml`:
 ```yaml

@@ -1,0 +1,30 @@
+# Plugin prefix
+prefix: '&8「&#635AA7C&#7D72B7o&#978BC7n&#B2A3D8f&#CCBCE8i&#E6D4F8r&#D8B8F8m&#C99CF72&#BB80F7D&#AC64F6r&#9E48F6o&#905CF5p&8」&7» '
+
+# Base Command Message
+base-command-color: '&7'
+base-command-help: '&7Folosește &c/confirm2drop help &7pentru informații despre comenzi.'
+
+# Help Command
+command-help-description: '&8 - &c/confirm2drop help &7- Afișează meniul de ajutor'
+command-help-title: '&cComenzi disponibile:'
+
+# Misc
+no-permission: '&cNu ai permisiunea necesară pentru asta!'
+unknown-command: '&cComandă necunoscută &4%input%&c.'
+invalid-command-usage: '&cUtilizare incorectă a comenzii.'
+player-only-command: '&cAceastă comandă poate fi utilizată doar de jucători!'
+drop-confirmation-message: "&7Trebuie să arunci din nou obiectul pentru a confirma acțiunea. Pentru a dezactiva confirmarea, folosește &c/confirm2drop toggle&7."
+
+# Toggle Command Message
+command-toggle-description: '&8 - &c/confirm2drop toggle &7- Activează sau dezactivează confirmarea pentru jucător'
+command-toggle-enabled: '&7Confirmarea drop-ului a fost &aactivată&7!'
+command-toggle-disabled: '&7Confirmarea drop-ului a fost &cdezactivată&7!'
+
+# Reload Command
+command-reload-description: '&8 - &c/confirm2drop reload &7- Reîncarcă pluginul'
+command-reload-usage: '&7Utilizare: &c/confirm2drop reload'
+command-reload-success: '&7Fișierele de configurare și limbă au fost reîncărcate cu succes.'
+
+# Version Command
+command-version-description: '&8 - &c/confirm2drop version &7- Afișează informațiile despre versiunea Confirm2Drop'

@@ -1,0 +1,36 @@
+name: Confirm2Drop
+version: '@version@'
+authors: [padrewin]
+website: 'https://github.com/Cold-Development/Confirm2Drop'
+description: A plugin that requires confirmation to drop specific items.
+main: dev.padrewin.confirm2Drop.Confirm2Drop
+api-version: '1.20'
+load: STARTUP
+folia-supported: true
+libraries:
+  - 'org.xerial:sqlite-jdbc:3.46.0.0'
+
+commands:
+  confirm2drop:
+    aliases: [c2d, dropconfirm]
+    description: Root command for Confirm2Drop
+
+permissions:
+  confirm2drop.*:
+    description: Gives access to all Confirm2Drop commands
+    children:
+      confirm2drop.help: true
+      confirm2drop.reload: true
+      confirm2drop.toggle: true
+
+  confirm2drop.help:
+    description: Allows access to the help command
+    default: true
+
+  confirm2drop.reload:
+    description: Allows access to reload the plugin configuration and locales
+    default: op
+
+  confirm2drop.toggle:
+    description: Allows players to toggle drop confirmation
+    default: true

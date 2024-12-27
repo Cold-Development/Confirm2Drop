@@ -44,6 +44,7 @@ public final class Confirm2Drop extends ColdPlugin {
     public void enable() {
         instance = this;
 
+        // Initialize and register DropListener
         dropListener = new DropListener(this);
         Bukkit.getPluginManager().registerEvents(dropListener, this);
 
@@ -73,8 +74,6 @@ public final class Confirm2Drop extends ColdPlugin {
         }
 
         saveDefaultConfig();
-
-        Bukkit.getPluginManager().registerEvents(new DropListener(this), this);
     }
 
     @Override

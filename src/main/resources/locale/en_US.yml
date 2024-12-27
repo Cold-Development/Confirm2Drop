@@ -1,0 +1,30 @@
+# Plugin prefix
+prefix: '&8「&#635AA7C&#7D72B7o&#978BC7n&#B2A3D8f&#CCBCE8i&#E6D4F8r&#D8B8F8m&#C99CF72&#BB80F7D&#AC64F6r&#9E48F6o&#905CF5p&8」&7» '
+
+# Base Command Message
+base-command-color: '&7'
+base-command-help: '&7Use &c/confirm2drop help &7for command information.'
+
+# Help Command
+command-help-description: '&8 - &c/confirm2drop help &7- Displays the help menu'
+command-help-title: '&cAvailable Commands:'
+
+# Misc
+no-permission: '&cYou don''t have permission for that!'
+unknown-command: '&cUnknown command &4%input%&c.'
+invalid-command-usage: '&cInvalid command usage.'
+player-only-command: '&cThis command can only be used by players!'
+drop-confirmation-message: "&7You need to drop the item again to confirm the action. To disable confirmation, use &c/confirm2drop toggle&7."
+
+# Toggle Command Message
+command-toggle-description: '&8 - &c/confirm2drop toggle &7- Toggles drop confirmation for the player'
+command-toggle-enabled: '&7Drop confirmation has been &aenabled&7!'
+command-toggle-disabled: '&7Drop confirmation has been &cdisabled&7!'
+
+# Reload Command
+command-reload-description: '&8 - &c/confirm2drop reload &7- Reloads the plugin'
+command-reload-usage: '&7Usage: &c/confirm2drop reload'
+command-reload-success: '&7Configuration and locale files were reloaded successfully.'
+
+# Version Command
+command-version-description: '&8 - &c/confirm2drop version &7- Display the version info for Confirm2Drop'

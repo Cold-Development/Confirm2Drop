@@ -19,7 +19,7 @@
 </details>
 
 ## 🛠️ Installation
-1. **Download the plugin**: Download the latest version of the MoneyPouchDeluxe plugin from [GitHub Release](https://github.com/Cold-Development/Confirm2Drop/releases/tag/v1.0) page.
+1. **Download the plugin**: Download the latest version of the MoneyPouchDeluxe plugin from [GitHub Releases](https://github.com/Cold-Development/Confirm2Drop/releases) page.
 2. **Install the plugin**: Copy the `.jar` file into your server's `plugins` directory.
 3. **Configure the plugin**: Run the server for the first time to generate the configuration files, then stop it. Edit the `config.yml` file to customize the plugin to your liking.
 4. **Start the server**: Start the server again to load the plugin with your custom settings.

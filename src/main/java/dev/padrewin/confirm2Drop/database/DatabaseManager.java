@@ -5,6 +5,9 @@ import dev.padrewin.confirm2Drop.Confirm2Drop;
 import java.io.File;
 import java.sql.*;
 
+import static dev.padrewin.colddev.manager.AbstractDataManager.*;
+import static dev.padrewin.colddev.manager.AbstractDataManager.ANSI_RESET;
+
 public class DatabaseManager {
 
     private final Confirm2Drop plugin;
@@ -25,9 +28,9 @@ public class DatabaseManager {
 
             String dbPath = dataFolder.getAbsolutePath() + File.separator + "confirm2drop.db";
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-            plugin.getLogger().info("Database connected using SQLite.");
+            plugin.getLogger().info(ANSI_LIGHT_BLUE + "Database connected using SQLite. " + ANSI_BOLD + ANSI_GREEN + "✔" + ANSI_RESET);
         } catch (SQLException e) {
-            plugin.getLogger().warning("Database failed to connect.");
+            plugin.getLogger().warning(ANSI_RED + "Database failed to connect. " + ANSI_BOLD + ANSI_RED + "✘" + ANSI_RESET);
             e.printStackTrace();
         }
     }

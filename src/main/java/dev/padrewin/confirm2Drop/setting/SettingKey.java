@@ -22,6 +22,13 @@ public class SettingKey {
             "If left as blank, the default behavior of showing '/confirm2drop version' with bypassed permissions will be used",
             "");
 
+    // Global toggle setting
+    public static final ColdSetting<Boolean> GLOBAL_TOGGLE = create("confirm2drop", BOOLEAN, true,
+            "Enable or disable the Confirm2Drop feature globally.",
+            "If set to false, no confirmation will be required for dropping items,",
+            "and the plugin will ignore all player-specific settings.",
+            "No changes to the toggle preference can be made while the feature is disabled.");
+
     // Blacklist settings
     public static final ColdSetting<Boolean> TOOLS = create("blacklist.tools", BOOLEAN, true,
             "Enable or disable confirmation for all tools.",

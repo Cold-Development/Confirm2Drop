@@ -1,0 +1,46 @@
+name: Maven Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+    # Checkout the repository code
+    - uses: actions/checkout@v4
+
+    # Set up JDK 17
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # Create settings.xml for publishing to Nexus
+    - name: Create settings.xml for publishing
+      run: |
+        cat <<EOF > $GITHUB_WORKSPACE/settings.xml
+        <settings>
+          <servers>
+            <server>
+              <id>colddev-repo</id>
+              <username>${{ secrets.NEXUS_USERNAME }}</username>
+              <password>${{ secrets.NEXUS_PASSWORD }}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+
+    # Build and package the project
+    - name: Build with Maven
+      run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml
+
+    # Deploy to Nexus
+    - name: Deploy to Nexus Repository
+      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml -e -X

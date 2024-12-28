@@ -3,28 +3,31 @@ prefix: '&8「&#635AA7C&#7D72B7o&#978BC7n&#B2A3D8f&#CCBCE8i&#E6D4F8r&#D8B8F8m&#C
 
 # Base Command Message
 base-command-color: '&7'
-base-command-help: '&7Use &c/confirm2drop help &7para informações sobre comandos.'
+base-command-help: '&7Use &c/confirm2drop help &7para informações sobre os comandos.'
 
 # Help Command
-command-help-description: '&8 - &c/confirm2drop help &7- Mostra o menu de ajuda'
-command-help-title: '&cComandos disponíveis:'
+command-help-description: '&8 - &c/confirm2drop help &7- Exibe o menu de ajuda'
+command-help-title: '&cComandos Disponíveis:'
 
 # Misc
-no-permission: '&cVocê não tem permissão para fazer isso!'
+no-permission: '&cVocê não tem permissão para isso!'
 unknown-command: '&cComando desconhecido &4%input%&c.'
-invalid-command-usage: '&cUso incorreto do comando.'
+invalid-command-usage: '&cUso inválido do comando.'
 player-only-command: '&cEste comando só pode ser usado por jogadores!'
-drop-confirmation-message: "&7Você precisa jogar o item novamente para confirmar a ação. Para desativar a confirmação, use &c/confirm2drop toggle&7."
+drop-confirmation-message: '&7Você precisa soltar o item novamente para confirmar a ação. Para desativar a confirmação, use &c/confirm2drop toggle&7.'
+plugin-disabled-message: '&cOps! Este recurso está desativado nas configurações do servidor. Entre em contato com o administrador do servidor.'
 
 # Toggle Command Message
-command-toggle-description: '&8 - &c/confirm2drop toggle &7- Ativa ou desativa a confirmação de drop para o jogador'
+command-toggle-description: '&8 - &c/confirm2drop toggle &7- Alterna a confirmação de drop para o jogador'
+command-toggle-usage: '&7Uso: &c/confirm2drop toggle confirm'
+command-toggle-warning: '&eAVISO: &cTem certeza de que deseja alternar a confirmação de drop? Use &a/confirm2drop toggle confirm &cpara continuar.'
 command-toggle-enabled: '&7A confirmação de drop foi &aativada&7!'
 command-toggle-disabled: '&7A confirmação de drop foi &cdesativada&7!'
 
 # Reload Command
 command-reload-description: '&8 - &c/confirm2drop reload &7- Recarrega o plugin'
 command-reload-usage: '&7Uso: &c/confirm2drop reload'
-command-reload-success: '&7Os arquivos de configuração e idioma foram recarregados com sucesso.'
+command-reload-success: '&7Os arquivos de configuração e locais foram recarregados com sucesso.'
 
 # Version Command
-command-version-description: '&8 - &c/confirm2drop version &7- Mostra as informações da versão do Confirm2Drop'
+command-version-description: '&8 - &c/confirm2drop version &7- Exibe informações da versão do Confirm2Drop'

@@ -19,28 +19,39 @@ public class ToggleCommand extends BaseCommand {
     @Override
     public void execute(Confirm2Drop plugin, CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            plugin.getManager(LocaleManager.class).sendMessage(sender, "command-player-only");
+            plugin.getManager(LocaleManager.class).sendMessage(sender, "player-only-command");
             return;
         }
 
         Player player = (Player) sender;
+        LocaleManager localeManager = plugin.getManager(LocaleManager.class);
         String uuid = player.getUniqueId().toString();
         String playerName = player.getName();
 
-        // Obține preferința curentă
-        boolean currentPreference = plugin.getDatabaseManager().getPlayerPreference(uuid);
+        if (!plugin.getConfig().getBoolean("confirm2drop", true)) {
+            localeManager.sendMessage(player, "plugin-disabled-message");
+            return;
+        }
 
-        // Inversăm preferința
+        if (args.length == 0) {
+            localeManager.sendMessage(player, "command-toggle-warning");
+            return;
+        }
+
+        if (!args[0].equalsIgnoreCase("confirm") || args.length > 1) {
+            localeManager.sendMessage(player, "command-toggle-usage");
+            return;
+        }
+
+        boolean currentPreference = plugin.getDatabaseManager().getPlayerPreference(uuid);
         boolean newPreference = !currentPreference;
         plugin.getDatabaseManager().savePlayerPreference(uuid, playerName, newPreference);
 
-        // Resetăm confirmările
         DropListener dropListener = plugin.getDropListener();
         dropListener.resetPendingConfirmation(player);
 
-        // Trimiterea mesajului pe baza noii setări
         String messageKey = newPreference ? "command-toggle-enabled" : "command-toggle-disabled";
-        plugin.getManager(LocaleManager.class).sendMessage(player, messageKey);
+        localeManager.sendMessage(player, messageKey);
     }
 
     @Override

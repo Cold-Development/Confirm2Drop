@@ -32,6 +32,11 @@ public class DropListener implements Listener {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
+        // Verificăm dacă pluginul este dezactivat global
+        if (!plugin.getConfig().getBoolean("confirm2drop", true)) {
+            return; // Permitem drop-ul fără cerințe
+        }
+
         // Ignorăm confirmarea pentru jucătorii aflați în Creative
         if (player.getGameMode() == GameMode.CREATIVE) {
             return; // Permitem direct drop-ul fără cerințe

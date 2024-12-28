@@ -3,28 +3,31 @@ prefix: '&8「&#635AA7C&#7D72B7o&#978BC7n&#B2A3D8f&#CCBCE8i&#E6D4F8r&#D8B8F8m&#C
 
 # Base Command Message
 base-command-color: '&7'
-base-command-help: '&7使用 &c/confirm2drop help &7查看命令信息。'
+base-command-help: '&7使用 &c/confirm2drop help &7查看指令信息。'
 
 # Help Command
 command-help-description: '&8 - &c/confirm2drop help &7- 显示帮助菜单'
-command-help-title: '&c可用命令：'
+command-help-title: '&c可用指令:'
 
 # Misc
-no-permission: '&c您没有权限执行此操作！'
-unknown-command: '&c未知命令 &4%input%&c。'
-invalid-command-usage: '&c命令使用错误。'
-player-only-command: '&c此命令仅玩家可用！'
-drop-confirmation-message: "&7您需要再次丢弃物品以确认操作。要禁用确认，请使用 &c/confirm2drop toggle&7。"
+no-permission: '&c你没有权限执行此操作！'
+unknown-command: '&c未知指令 &4%input%&c。'
+invalid-command-usage: '&c指令使用无效。'
+player-only-command: '&c此指令仅限玩家使用！'
+drop-confirmation-message: '&7你需要再次丢弃该物品以确认操作。若要禁用确认，请使用 &c/confirm2drop toggle&7。'
+plugin-disabled-message: '&c抱歉！此功能已在服务器设置中关闭。请联系服务器管理员。'
 
 # Toggle Command Message
 command-toggle-description: '&8 - &c/confirm2drop toggle &7- 切换玩家的丢弃确认'
-command-toggle-enabled: '&7丢弃确认已&a启用&7！'
-command-toggle-disabled: '&7丢弃确认已&c禁用&7！'
+command-toggle-usage: '&7用法: &c/confirm2drop toggle confirm'
+command-toggle-warning: '&e警告: &c你确定要切换丢弃确认吗？使用 &a/confirm2drop toggle confirm &c继续。'
+command-toggle-enabled: '&7丢弃确认已被 &a启用&7！'
+command-toggle-disabled: '&7丢弃确认已被 &c禁用&7！'
 
 # Reload Command
 command-reload-description: '&8 - &c/confirm2drop reload &7- 重新加载插件'
-command-reload-usage: '&7用法：&c/confirm2drop reload'
-command-reload-success: '&7配置文件和语言文件已成功重新加载。'
+command-reload-usage: '&7用法: &c/confirm2drop reload'
+command-reload-success: '&7配置和本地化文件已成功重新加载。'
 
 # Version Command
-command-version-description: '&8 - &c/confirm2drop version &7- 显示 Confirm2Drop 的版本信息'
+command-version-description: '&8 - &c/confirm2drop version &7- 显示 Confirm2Drop 插件版本信息'

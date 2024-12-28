@@ -7,24 +7,27 @@ base-command-help: '&7Folosește &c/confirm2drop help &7pentru informații despr
 
 # Help Command
 command-help-description: '&8 - &c/confirm2drop help &7- Afișează meniul de ajutor'
-command-help-title: '&cComenzi disponibile:'
+command-help-title: '&cComenzi Disponibile:'
 
 # Misc
-no-permission: '&cNu ai permisiunea necesară pentru asta!'
+no-permission: '&cNu ai permisiunea pentru această acțiune!'
 unknown-command: '&cComandă necunoscută &4%input%&c.'
-invalid-command-usage: '&cUtilizare incorectă a comenzii.'
+invalid-command-usage: '&cUtilizare invalidă a comenzii.'
 player-only-command: '&cAceastă comandă poate fi utilizată doar de jucători!'
-drop-confirmation-message: "&7Trebuie să arunci din nou obiectul pentru a confirma acțiunea. Pentru a dezactiva confirmarea, folosește &c/confirm2drop toggle&7."
+drop-confirmation-message: '&7Trebuie să arunci din nou obiectul pentru a confirma acțiunea. Pentru a dezactiva confirmarea, folosește &c/confirm2drop toggle&7.'
+plugin-disabled-message: '&cUps! Această funcționalitate este dezactivată în setările serverului. Contactează ownerul serverului.'
 
 # Toggle Command Message
-command-toggle-description: '&8 - &c/confirm2drop toggle &7- Activează sau dezactivează confirmarea pentru jucător'
+command-toggle-description: '&8 - &c/confirm2drop toggle &7- Activează/dezactivează confirmarea pentru drop pentru jucător'
+command-toggle-usage: '&7Utilizare: &c/confirm2drop toggle confirm'
+command-toggle-warning: '&eAVERTISMENT: &cEști sigur că vrei să activezi/dezactivezi confirmarea drop-ului? Folosește &a/confirm2drop toggle confirm &cpentru a continua.'
 command-toggle-enabled: '&7Confirmarea drop-ului a fost &aactivată&7!'
 command-toggle-disabled: '&7Confirmarea drop-ului a fost &cdezactivată&7!'
 
 # Reload Command
 command-reload-description: '&8 - &c/confirm2drop reload &7- Reîncarcă pluginul'
 command-reload-usage: '&7Utilizare: &c/confirm2drop reload'
-command-reload-success: '&7Fișierele de configurare și limbă au fost reîncărcate cu succes.'
+command-reload-success: '&7Fișierele de configurație și locale au fost reîncărcate cu succes.'
 
 # Version Command
 command-version-description: '&8 - &c/confirm2drop version &7- Afișează informațiile despre versiunea Confirm2Drop'

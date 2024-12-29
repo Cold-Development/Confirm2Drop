@@ -1,3 +1,4 @@
+![c2d](https://github.com/user-attachments/assets/1d48bbfe-b446-4266-97c6-1827686bdef0)
 # Confirm2Drop
 
 **Confirm2Drop** is a lightweight Minecraft plugin that protects players from accidentally dropping valuable items. Players are prompted to confirm drops for items listed in the configurable blacklist, ensuring they don’t lose important gear.

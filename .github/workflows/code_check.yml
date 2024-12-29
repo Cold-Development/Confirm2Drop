@@ -1,0 +1,43 @@
+name: Java Code Check
+
+on:
+  push:
+    branches:
+      - master
+      - development
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  code-check:
+    name: Java Code Check
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Java environment
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17' # Adjust Java version if necessary
+
+      # Step 3: Cache Maven dependencies
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Step 4: Run Maven clean and compile
+      - name: Compile Code
+        run: mvn clean compile
+
+      # Step 5: Run Maven tests
+      - name: Run Tests
+        run: mvn test

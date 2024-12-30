@@ -9,6 +9,15 @@
 - Fully customizable blacklist in `config.yml`.
 - Toggleable per-player confirmation with `/confirm2drop toggle`.
 - Data storage fully supports **`SQLite`**.
+  <details>
+    <summary>Database viewer</summary>
+    
+  - Simple system understanding:
+    -  **`1 - ON`** | **`0 - OFF`**
+  ![Screenshot_4](https://github.com/user-attachments/assets/8a681ad2-2fb6-4864-acad-9c640815f630)
+  - Website to check SQLite database:
+    - https://padrewin.colddev.dev/sqlite-viewer
+  </details>
 - Configurable timeout for confirmation requests.
 - Compatible with recent Minecraft versions (API 1.20).
 

@@ -33,12 +33,13 @@ public class ToggleCommand extends BaseCommand {
             return;
         }
 
-        if (args.length == 0) {
+        boolean toggleWarning = plugin.getConfig().getBoolean("toggle-warning", true);
+        if (toggleWarning && args.length == 0) {
             localeManager.sendMessage(player, "command-toggle-warning");
             return;
         }
 
-        if (!args[0].equalsIgnoreCase("confirm") || args.length > 1) {
+        if (toggleWarning && (!args[0].equalsIgnoreCase("confirm") || args.length > 1)) {
             localeManager.sendMessage(player, "command-toggle-usage");
             return;
         }
@@ -53,6 +54,7 @@ public class ToggleCommand extends BaseCommand {
         String messageKey = newPreference ? "command-toggle-enabled" : "command-toggle-disabled";
         localeManager.sendMessage(player, messageKey);
     }
+
 
     @Override
     public List<String> tabComplete(Confirm2Drop plugin, CommandSender sender, String[] args) {

@@ -76,8 +76,21 @@ locale: en_US
 # You can use a value here such as 'version' to show the output of '/confirm2drop version'
 # If you have any aliases defined, do not use them here
 # If left as blank, the default behavior of showing '/confirm2drop version' with bypassed permissions will be used
+# 
 # Default: 
 base-command-redirect: ''
+
+# When true, players must confirm the toggle action with '/c2d toggle confirm'.
+# When false, the toggle action works directly with '/c2d toggle'.
+# Default: false
+toggle-warning: false
+
+# Enable or disable the Confirm2Drop feature globally.
+# If set to false, no confirmation will be required for dropping items,
+# and the plugin will ignore all player-specific settings.
+# No changes to the toggle preference can be made while the feature is disabled.
+# Default: true
+confirm2drop: true
 blacklist:
 
   # Enable or disable confirmation for all tools.
@@ -99,6 +112,11 @@ blacklist:
   # If set to true, players will need to confirm dropping items with enchantments.
   # Default: true
   enchanted-items: true
+
+  # A list of specific item IDs that require confirmation before dropping.
+  # Example: [lodestone_compass, compass, mace, totem_of_undying]
+  # Add the item IDs here to enforce confirmation for custom items.
+  others: []
 
 # Time in seconds before the confirmation request expires.
 # If the player does not confirm the drop within this time, the request will be canceled.

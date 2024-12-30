@@ -22,6 +22,11 @@ public class SettingKey {
             "If left as blank, the default behavior of showing '/confirm2drop version' with bypassed permissions will be used",
             "");
 
+    // Toggle warning message and confirmation required
+    public static final ColdSetting<Boolean> TOGGLE_WARNING = create("toggle-warning", BOOLEAN, false,
+            "When true, players must confirm the toggle action with '/c2d toggle confirm'.",
+            "When false, the toggle action works directly with '/c2d toggle'.");
+
     // Global toggle setting
     public static final ColdSetting<Boolean> GLOBAL_TOGGLE = create("confirm2drop", BOOLEAN, true,
             "Enable or disable the Confirm2Drop feature globally.",
@@ -45,6 +50,12 @@ public class SettingKey {
     public static final ColdSetting<Boolean> ENCHANTED_ITEMS = create("blacklist.enchanted-items", BOOLEAN, true,
             "Enable or disable confirmation for enchanted items.",
             "If set to true, players will need to confirm dropping items with enchantments.");
+
+    // Blacklist for specific items by ID
+    public static final ColdSetting<List<String>> OTHER_ITEMS = create("blacklist.others", list(STRING), Collections.emptyList(),
+            "A list of specific item IDs that require confirmation before dropping.",
+            "Example: [lodestone_compass, compass, mace, totem_of_undying]",
+            "Add the item IDs here to enforce confirmation for custom items.");
 
     // Confirmation timeout
     public static final ColdSetting<Integer> CONFIRMATION_TIMEOUT = create("confirmation-timeout", INTEGER, 5,

@@ -82,7 +82,7 @@ public class DatabaseManager {
             e.printStackTrace();
         }
 
-        return true; // Implicit ON dacă nu există
+        return true;
     }
 
     public void closeConnection() {

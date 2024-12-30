@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,7 +20,6 @@ public class DropListener implements Listener {
 
     private final Confirm2Drop plugin;
 
-    // Asociem jucătorul cu detalii despre itemul care necesită confirmare și timpul de expirare
     private final Map<UUID, ItemStack> pendingConfirmation = new HashMap<>();
     private final Map<UUID, Long> confirmationTimeouts = new HashMap<>();
 
@@ -32,62 +32,62 @@ public class DropListener implements Listener {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
-        // Verificăm dacă pluginul este dezactivat global
         if (!plugin.getConfig().getBoolean("confirm2drop", true)) {
-            return; // Permitem drop-ul fără cerințe
+            debug("Confirm2Drop is globally disabled. Ignoring drop event.");
+            return;
         }
 
-        // Ignorăm confirmarea pentru jucătorii aflați în Creative
         if (player.getGameMode() == GameMode.CREATIVE) {
-            return; // Permitem direct drop-ul fără cerințe
+            debug("Player " + player.getName() + " is in Creative mode. Ignoring drop event.");
+            return;
         }
 
-        // Verificăm dacă jucătorul are confirmarea dezactivată
         boolean isToggleDisabled = !plugin.getDatabaseManager().getPlayerPreference(playerUUID.toString());
         if (isToggleDisabled) {
-            return; // Nu cerem confirmare dacă preferința este dezactivată
+            debug("Player " + player.getName() + " has disabled Confirm2Drop for themselves. Ignoring drop event.");
+            return;
         }
 
         ItemStack item = event.getItemDrop().getItemStack();
+        debug("Player " + player.getName() + " is trying to drop item: " + item.getType() + " x" + item.getAmount());
 
-        // Dacă există deja o cerere activă pentru acest item
         if (pendingConfirmation.containsKey(playerUUID)) {
             ItemStack pendingItem = pendingConfirmation.get(playerUUID);
 
-            // Verificăm dacă este același item și timeout-ul nu a expirat
             long currentTime = System.currentTimeMillis();
             long timeoutEnd = confirmationTimeouts.getOrDefault(playerUUID, 0L);
 
             if (areItemsEqual(pendingItem, item) && currentTime < timeoutEnd) {
-                // Confirmare completă, permite drop-ul
+                debug("Player " + player.getName() + " confirmed the drop for item: " + item.getType());
                 pendingConfirmation.remove(playerUUID);
                 confirmationTimeouts.remove(playerUUID);
-                return; // Permitem drop-ul fără cerere suplimentară
+                return;
             } else if (!areItemsEqual(pendingItem, item)) {
-                // Dacă este un item diferit, eliminăm cererea pentru itemul anterior
+                debug("Player " + player.getName() + " attempted to drop a different item. Resetting pending confirmation.");
                 pendingConfirmation.remove(playerUUID);
                 confirmationTimeouts.remove(playerUUID);
             }
         }
 
-        // Dacă itemul curent nu necesită confirmare, permite drop-ul
         if (!shouldRequireConfirmation(item)) {
+            debug("No confirmation required for item: " + item.getType());
             return;
         }
 
-        // Cerem confirmare pentru itemul curent
+        debug("Confirmation required for item: " + item.getType());
         event.setCancelled(true);
         requestConfirmation(player, item);
     }
 
     private void requestConfirmation(Player player, ItemStack item) {
         UUID playerUUID = player.getUniqueId();
-        pendingConfirmation.put(playerUUID, item.clone()); // Stocăm o copie pentru comparații ulterioare
+        pendingConfirmation.put(playerUUID, item.clone());
 
-        int timeoutSeconds = plugin.getConfig().getInt("confirmation-timeout", 10); // Timp default de 10 secunde
+        int timeoutSeconds = plugin.getConfig().getInt("confirmation-timeout", 10);
         long timeoutEnd = System.currentTimeMillis() + (timeoutSeconds * 1000L);
-        confirmationTimeouts.put(playerUUID, timeoutEnd); // Setăm timpul de expirare
+        confirmationTimeouts.put(playerUUID, timeoutEnd);
 
+        debug("Confirmation request sent to player " + player.getName() + " for item: " + item.getType() + ". Timeout: " + timeoutSeconds + " seconds.");
         plugin.getManager(LocaleManager.class).sendMessage(player, "drop-confirmation-message");
     }
 
@@ -97,13 +97,30 @@ public class DropListener implements Listener {
         boolean spawnEggsBlacklist = plugin.getConfig().getBoolean("blacklist.spawn-eggs", true);
         boolean enchantedItemsBlacklist = plugin.getConfig().getBoolean("blacklist.enchanted-items", true);
 
-        // Verificăm fiecare setare și tipul itemului
-        if (toolsBlacklist && isTool(item.getType())) return true;
-        if (armorBlacklist && isArmor(item.getType())) return true;
-        if (spawnEggsBlacklist && item.getType().toString().endsWith("_SPAWN_EGG")) return true;
-        if (enchantedItemsBlacklist && item.getEnchantments().size() > 0) return true;
+        if (toolsBlacklist && isTool(item.getType())) {
+            debug("Item " + item.getType() + " is a tool and requires confirmation.");
+            return true;
+        }
+        if (armorBlacklist && isArmor(item.getType())) {
+            debug("Item " + item.getType() + " is armor and requires confirmation.");
+            return true;
+        }
+        if (spawnEggsBlacklist && item.getType().toString().endsWith("_SPAWN_EGG")) {
+            debug("Item " + item.getType() + " is a spawn egg and requires confirmation.");
+            return true;
+        }
+        if (enchantedItemsBlacklist && item.getEnchantments().size() > 0) {
+            debug("Item " + item.getType() + " is enchanted and requires confirmation.");
+            return true;
+        }
 
-        return false; // Dacă nu este pe lista neagră sau setările sunt dezactivate
+        List<String> otherItems = plugin.getConfig().getStringList("blacklist.others");
+        if (otherItems.contains(item.getType().toString().toLowerCase())) {
+            debug("Item " + item.getType() + " is in the custom blacklist and requires confirmation.");
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isTool(Material material) {
@@ -118,7 +135,6 @@ public class DropListener implements Listener {
     }
 
     private boolean areItemsEqual(ItemStack item1, ItemStack item2) {
-        // Verificăm dacă itemele sunt similare și au aceeași cantitate
         return item1.isSimilar(item2) && item1.getAmount() == item2.getAmount();
     }
 
@@ -126,5 +142,12 @@ public class DropListener implements Listener {
         UUID playerUUID = player.getUniqueId();
         pendingConfirmation.remove(playerUUID);
         confirmationTimeouts.remove(playerUUID);
+        debug("Pending confirmation reset for player " + player.getName());
+    }
+
+    private void debug(String message) {
+        if (plugin.getConfig().getBoolean("debug", false)) {
+            Bukkit.getLogger().info("[Confirm2Drop DEBUG] " + message);
+        }
     }
 }

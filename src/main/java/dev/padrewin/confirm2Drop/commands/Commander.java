@@ -5,7 +5,6 @@ import dev.padrewin.confirm2Drop.Confirm2Drop;
 import dev.padrewin.confirm2Drop.manager.CommandManager;
 import dev.padrewin.confirm2Drop.manager.LocaleManager;
 import dev.padrewin.confirm2Drop.setting.SettingKey;
-import dev.padrewin.confirm2Drop.Confirm2Drop;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -51,7 +50,6 @@ public class Commander extends CommandHandler {
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void unknownCommand(CommandSender sender, String[] args) {

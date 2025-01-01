@@ -1,5 +1,6 @@
 package dev.padrewin.confirm2Drop.commands;
 
+import dev.padrewin.colddev.utils.StringPlaceholders;
 import dev.padrewin.confirm2Drop.Confirm2Drop;
 import dev.padrewin.confirm2Drop.listeners.DropListener;
 import dev.padrewin.confirm2Drop.manager.CommandManager;
@@ -18,13 +19,13 @@ public class ToggleCommand extends BaseCommand {
 
     @Override
     public void execute(Confirm2Drop plugin, CommandSender sender, String[] args) {
+        LocaleManager localeManager = plugin.getManager(LocaleManager.class);
         if (!(sender instanceof Player)) {
-            plugin.getManager(LocaleManager.class).sendMessage(sender, "player-only-command");
+            localeManager.sendMessage(sender, "player-only-command");
             return;
         }
 
         Player player = (Player) sender;
-        LocaleManager localeManager = plugin.getManager(LocaleManager.class);
         String uuid = player.getUniqueId().toString();
         String playerName = player.getName();
 
@@ -48,11 +49,17 @@ public class ToggleCommand extends BaseCommand {
         boolean newPreference = !currentPreference;
         plugin.getDatabaseManager().savePlayerPreference(uuid, playerName, newPreference);
 
-        DropListener dropListener = plugin.getDropListener();
-        dropListener.resetPendingConfirmation(player);
+        plugin.getDropListener().resetPendingConfirmation(player);
 
-        String messageKey = newPreference ? "command-toggle-enabled" : "command-toggle-disabled";
-        localeManager.sendMessage(player, messageKey);
+        String toggleStatus = newPreference
+                ? localeManager.getLocaleMessage("placeholder-status-enabled")
+                : localeManager.getLocaleMessage("placeholder-status-disabled");
+
+        localeManager.sendMessage(
+                player,
+                "command-toggle-status",
+                StringPlaceholders.builder("confirm2drop_toggle_status", toggleStatus).build()
+        );
     }
 
 

@@ -7,6 +7,7 @@ import dev.padrewin.colddev.database.SQLiteConnector;
 import dev.padrewin.colddev.manager.Manager;
 import dev.padrewin.colddev.manager.PluginUpdateManager;
 import dev.padrewin.confirm2Drop.database.DatabaseManager;
+import dev.padrewin.confirm2Drop.hook.Confirm2DropPlaceholderExpansion;
 import dev.padrewin.confirm2Drop.manager.CommandManager;
 import dev.padrewin.confirm2Drop.manager.LocaleManager;
 import dev.padrewin.confirm2Drop.setting.SettingKey;
@@ -16,6 +17,9 @@ import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.util.List;
+
+import static dev.padrewin.colddev.manager.AbstractDataManager.ANSI_BOLD;
+import static dev.padrewin.colddev.manager.AbstractDataManager.ANSI_LIGHT_BLUE;
 
 public final class Confirm2Drop extends ColdPlugin {
 
@@ -53,6 +57,14 @@ public final class Confirm2Drop extends ColdPlugin {
         DatabaseConnector connector = new SQLiteConnector(this);
         String databasePath = connector.getDatabasePath();
         getLogger().info(ANSI_GREEN + "Database path: " + ANSI_YELLOW + databasePath + ANSI_RESET);
+
+        // Initialize PlaceholderAPI
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new Confirm2DropPlaceholderExpansion(this).register();
+            getLogger().info(ANSI_LIGHT_BLUE + "PlaceholderAPI hook registered successfully. " + ANSI_BOLD + ANSI_GREEN + "✔" + ANSI_RESET);
+        } else {
+            getLogger().warning(ANSI_LIGHT_BLUE + "PlaceholderAPI not found. " + ANSI_BOLD + ANSI_RED + "✘" + ANSI_RESET);
+        }
 
         getManager(PluginUpdateManager.class);
 

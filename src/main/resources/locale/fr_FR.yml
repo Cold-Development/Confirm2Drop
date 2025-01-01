@@ -3,31 +3,32 @@ prefix: '&8「&#635AA7C&#7D72B7o&#978BC7n&#B2A3D8f&#CCBCE8i&#E6D4F8r&#D8B8F8m&#C
 
 # Base Command Message
 base-command-color: '&7'
-base-command-help: '&7Utilisez &c/confirm2drop help &7pour obtenir des informations sur les commandes.'
+base-command-help: '&7Utilisez &c/confirm2drop help &7pour les informations sur les commandes.'
 
 # Help Command
 command-help-description: '&8 - &c/confirm2drop help &7- Affiche le menu d''aide'
-command-help-title: '&cCommandes Disponibles :'
+command-help-title: '&cCommandes disponibles :'
 
 # Misc
-no-permission: '&cVous n''avez pas la permission pour cela !'
+no-permission: '&cVous n''avez pas la permission de faire cela !'
 unknown-command: '&cCommande inconnue &4%input%&c.'
 invalid-command-usage: '&cUtilisation invalide de la commande.'
-player-only-command: '&cCette commande est réservée aux joueurs !'
-drop-confirmation-message: '&7Vous devez rejeter à nouveau l''objet pour confirmer l''action. Pour désactiver la confirmation, utilisez &c/confirm2drop toggle&7.'
-plugin-disabled-message: '&cOups ! Cette fonctionnalité est actuellement désactivée dans les paramètres du serveur. Contactez l''administrateur du serveur.'
+player-only-command: '&cCette commande ne peut être utilisée que par des joueurs !'
+drop-confirmation-message: "&7Vous devez déposer l''objet à nouveau pour confirmer l''action. Pour désactiver la confirmation, utilisez &c/confirm2drop toggle&7."
+plugin-disabled-message: '&cOups ! Cette fonctionnalité est actuellement désactivée dans les paramètres du serveur. Contactez l''administrateur.'
+placeholder-status-enabled: "&aactivé"
+placeholder-status-disabled: "&cdésactivé"
 
 # Toggle Command Message
-command-toggle-description: '&8 - &c/confirm2drop toggle &7- Active/Désactive la confirmation pour le joueur'
-command-toggle-usage: '&7Utilisation : &c/confirm2drop toggle confirm'
-command-toggle-warning: '&eAVERTISSEMENT : &cÊtes-vous sûr de vouloir activer/désactiver la confirmation ? Utilisez &a/confirm2drop toggle confirm &cpour continuer.'
-command-toggle-enabled: '&7La confirmation de rejet a été &aactivée&7 !'
-command-toggle-disabled: '&7La confirmation de rejet a été &cdésactivée&7 !'
+command-toggle-description: '&8 - &c/confirm2drop toggle &7- Active ou désactive la confirmation des dépôts pour le joueur'
+command-toggle-usage: "&7Utilisation : &c/confirm2drop toggle confirm"
+command-toggle-warning: "&eATTENTION : &7Êtes-vous sûr de vouloir basculer la confirmation des dépôts ? Utilisez &c/confirm2drop toggle confirm &7pour continuer."
+command-toggle-status: '&7La confirmation des dépôts est réglée sur : %confirm2drop_toggle_status%&7 !'
 
 # Reload Command
 command-reload-description: '&8 - &c/confirm2drop reload &7- Recharge le plugin'
 command-reload-usage: '&7Utilisation : &c/confirm2drop reload'
-command-reload-success: '&7Les fichiers de configuration et de localisation ont été rechargés avec succès.'
+command-reload-success: '&7Les fichiers de configuration et de langue ont été rechargés avec succès.'
 
 # Version Command
-command-version-description: '&8 - &c/confirm2drop version &7- Affiche les informations de version pour Confirm2Drop'
+command-version-description: '&8 - &c/confirm2drop version &7- Affiche les informations de version de Confirm2Drop'

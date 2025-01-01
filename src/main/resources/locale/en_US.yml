@@ -16,13 +16,14 @@ invalid-command-usage: '&cInvalid command usage.'
 player-only-command: '&cThis command can only be used by players!'
 drop-confirmation-message: "&7You need to drop the item again to confirm the action. To disable confirmation, use &c/confirm2drop toggle&7."
 plugin-disabled-message: '&cOops! This feature is currently turned off in the server settings. Contact the server owner.'
+placeholder-status-enabled: "&aenabled"
+placeholder-status-disabled: "&cdisabled"
 
 # Toggle Command Message
 command-toggle-description: '&8 - &c/confirm2drop toggle &7- Toggles drop confirmation for the player'
 command-toggle-usage: "&7Usage: &c/confirm2drop toggle confirm"
 command-toggle-warning: "&eWARNING: &7Are you sure you want to toggle drop confirmation? Use &c/confirm2drop toggle confirm &7to proceed."
-command-toggle-enabled: '&7Drop confirmation has been &aenabled&7!'
-command-toggle-disabled: '&7Drop confirmation has been &cdisabled&7!'
+command-toggle-status: '&7Drop confirmation is now: %confirm2drop_toggle_status%&7.'
 
 # Reload Command
 command-reload-description: '&8 - &c/confirm2drop reload &7- Reloads the plugin'

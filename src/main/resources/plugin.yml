@@ -5,7 +5,7 @@ website: 'https://github.com/Cold-Development/Confirm2Drop'
 description: A plugin that requires confirmation to drop specific items.
 main: dev.padrewin.confirm2Drop.Confirm2Drop
 api-version: '1.20'
-load: STARTUP
+softdepend: [PlaceholderAPI]
 folia-supported: true
 libraries:
   - 'org.xerial:sqlite-jdbc:3.46.0.0'

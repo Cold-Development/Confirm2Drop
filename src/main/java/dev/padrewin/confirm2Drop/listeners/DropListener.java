@@ -7,9 +7,16 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,19 +25,48 @@ import java.util.UUID;
 
 public class DropListener implements Listener {
 
+    /**
+     * Sentinel for a drop whose source slot can't be determined (e.g. dropping
+     * an item that was already sitting on the cursor from an earlier pickup).
+     * Never matches a pending slot, so such drops can never auto-confirm.
+     */
+    private static final int UNKNOWN_SLOT = -1;
+
     private final Confirm2Drop plugin;
 
-    private final Map<UUID, ItemStack> pendingConfirmation = new HashMap<>();
-    private final Map<UUID, Long> confirmationTimeouts = new HashMap<>();
+    private final Map<UUID, PendingDrop> pendingConfirmation = new HashMap<>();
+
+    /**
+     * Slot captured from the InventoryClickEvent that triggers a drop while the
+     * player's inventory screen is open (armor/off-hand/main inventory all go
+     * through here); consumed by the matching PlayerDropItemEvent right after.
+     */
+    private final Map<UUID, Integer> pendingClickSlot = new HashMap<>();
 
     public DropListener(Confirm2Drop plugin) {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    private static final class PendingDrop {
+        final int slot;
+        final ItemStack item;
+        final long expiry;
+
+        PendingDrop(int slot, ItemStack item, long expiry) {
+            this.slot = slot;
+            this.item = item;
+            this.expiry = expiry;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
+
+        // Always drain this, even on an early return below, so a slot recorded for
+        // one drop attempt can never be misattributed to an unrelated later one.
+        Integer clickSlot = pendingClickSlot.remove(playerUUID);
 
         if (!plugin.getConfig().getBoolean("confirm2drop", true)) {
             debug("Confirm2Drop is globally disabled. Ignoring drop event.");
@@ -51,26 +87,28 @@ public class DropListener implements Listener {
         ItemStack item = event.getItemDrop().getItemStack();
         debug("Player " + player.getName() + " is trying to drop item: " + item.getType() + " x" + item.getAmount());
 
+        int sourceSlot = clickSlot != null ? clickSlot : player.getInventory().getHeldItemSlot();
+
         if (pendingConfirmation.containsKey(playerUUID)) {
-            ItemStack pendingItem = pendingConfirmation.get(playerUUID);
+            PendingDrop pending = pendingConfirmation.get(playerUUID);
 
             long currentTime = System.currentTimeMillis();
-            long timeoutEnd = confirmationTimeouts.getOrDefault(playerUUID, 0L);
+            boolean sameSlot = sourceSlot != UNKNOWN_SLOT && sourceSlot == pending.slot;
+            boolean sameItem = areItemsEqual(pending.item, item);
 
-            if (areItemsEqual(pendingItem, item) && currentTime < timeoutEnd) {
+            if (sameSlot && sameItem && currentTime < pending.expiry) {
+                pendingConfirmation.remove(playerUUID);
+
                 if (isInventoryFull(player)) {
                     dropItemToGround(player, item);
                     event.getItemDrop().remove();
                 } else {
                     debug("Player " + player.getName() + " confirmed the drop for item: " + item.getType());
                 }
-                pendingConfirmation.remove(playerUUID);
-                confirmationTimeouts.remove(playerUUID);
                 return;
-            } else if (!areItemsEqual(pendingItem, item)) {
-                debug("Player " + player.getName() + " attempted to drop a different item. Resetting pending confirmation.");
+            } else if (!sameItem || !sameSlot) {
+                debug("Player " + player.getName() + " attempted to drop a different item/slot. Resetting pending confirmation.");
                 pendingConfirmation.remove(playerUUID);
-                confirmationTimeouts.remove(playerUUID);
             }
         }
 
@@ -80,8 +118,59 @@ public class DropListener implements Listener {
         }
 
         debug("Confirmation required for item: " + item.getType());
+        cancelAndRestore(event, player, item);
+        requestConfirmation(player, item, sourceSlot);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        InventoryAction action = event.getAction();
+        UUID playerUUID = player.getUniqueId();
+
+        if (action == InventoryAction.DROP_ONE_SLOT || action == InventoryAction.DROP_ALL_SLOT) {
+            if (event.getClickedInventory() instanceof PlayerInventory) {
+                pendingClickSlot.put(playerUUID, event.getSlot());
+            }
+        } else if (action == InventoryAction.DROP_ONE_CURSOR || action == InventoryAction.DROP_ALL_CURSOR) {
+            pendingClickSlot.put(playerUUID, UNKNOWN_SLOT);
+        }
+    }
+
+    /**
+     * Cancels the drop and restores the item ourselves instead of trusting the
+     * server's implicit cancel-restore. That implicit restore is what let a
+     * pending item survive a death that happened in the same window: the item
+     * could still be "in flight" (removed from the inventory, not yet given
+     * back) when death drops were calculated, so it never dropped like the
+     * rest of the inventory and reappeared after respawn instead.
+     */
+    private void cancelAndRestore(PlayerDropItemEvent event, Player player, ItemStack item) {
         event.setCancelled(true);
-        requestConfirmation(player, item);
+        event.getItemDrop().remove();
+        player.getInventory().addItem(item.clone());
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        resetPendingConfirmation(event.getEntity());
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        resetPendingConfirmation(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        resetPendingConfirmation(event.getPlayer());
     }
 
 
@@ -95,16 +184,14 @@ public class DropListener implements Listener {
         plugin.getManager(LocaleManager.class).sendMessage(player, "inventory-full-drop-message");
     }
 
-    private void requestConfirmation(Player player, ItemStack item) {
+    private void requestConfirmation(Player player, ItemStack item, int sourceSlot) {
         UUID playerUUID = player.getUniqueId();
-
-        pendingConfirmation.put(playerUUID, item.clone());
 
         int timeoutSeconds = plugin.getConfig().getInt("confirmation-timeout", 10);
         long timeoutEnd = System.currentTimeMillis() + (timeoutSeconds * 1000L);
-        confirmationTimeouts.put(playerUUID, timeoutEnd);
+        pendingConfirmation.put(playerUUID, new PendingDrop(sourceSlot, item.clone(), timeoutEnd));
 
-        debug("Confirmation request sent to player " + player.getName() + " for item: " + item.getType() + ". Timeout: " + timeoutSeconds + " seconds.");
+        debug("Confirmation request sent to player " + player.getName() + " for item: " + item.getType() + " in slot " + sourceSlot + ". Timeout: " + timeoutSeconds + " seconds.");
         plugin.getManager(LocaleManager.class).sendMessage(player, "drop-confirmation-message");
     }
 
@@ -159,7 +246,7 @@ public class DropListener implements Listener {
     public void resetPendingConfirmation(Player player) {
         UUID playerUUID = player.getUniqueId();
         pendingConfirmation.remove(playerUUID);
-        confirmationTimeouts.remove(playerUUID);
+        pendingClickSlot.remove(playerUUID);
         debug("Pending confirmation reset for player " + player.getName());
     }
 

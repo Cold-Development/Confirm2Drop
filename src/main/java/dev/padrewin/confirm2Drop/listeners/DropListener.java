@@ -118,7 +118,7 @@ public class DropListener implements Listener {
         }
 
         debug("Confirmation required for item: " + item.getType());
-        cancelAndRestore(event, player, item);
+        cancelAndRestore(event);
         requestConfirmation(player, item, sourceSlot);
     }
 
@@ -145,17 +145,13 @@ public class DropListener implements Listener {
     }
 
     /**
-     * Cancels the drop and restores the item ourselves instead of trusting the
-     * server's implicit cancel-restore. That implicit restore is what let a
-     * pending item survive a death that happened in the same window: the item
-     * could still be "in flight" (removed from the inventory, not yet given
-     * back) when death drops were calculated, so it never dropped like the
-     * rest of the inventory and reappeared after respawn instead.
+     * Cancelling PlayerDropItemEvent is enough on its own: the server already
+     * restores the item to the player's inventory and discards the dropped
+     * entity as part of handling the cancellation. Manually re-adding the item
+     * here as well used to duplicate it (server restore + our own addItem()).
      */
-    private void cancelAndRestore(PlayerDropItemEvent event, Player player, ItemStack item) {
+    private void cancelAndRestore(PlayerDropItemEvent event) {
         event.setCancelled(true);
-        event.getItemDrop().remove();
-        player.getInventory().addItem(item.clone());
     }
 
     @EventHandler

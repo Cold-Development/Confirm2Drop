@@ -73,11 +73,27 @@ public class DropListener implements Listener {
     private final Map<UUID, CursorOrigin> cursorOrigin = new HashMap<>();
 
     /**
-     * Marks a player whose GUI drop was just confirmed and allowed to proceed
-     * unmodified. Consumed by the very next PlayerDropItemEvent so it isn't
-     * re-evaluated (and potentially re-cancelled) by {@link #onItemDrop}.
+     * Tick in which a player's GUI drop was confirmed and allowed to proceed
+     * unmodified, so the PlayerDropItemEvent it causes isn't re-evaluated (and
+     * potentially re-cancelled) by {@link #onItemDrop}. Scoped to that one tick
+     * rather than left standing: the click and the drop it triggers always land in
+     * the same tick, and if the drop never arrives - another plugin swallowed the
+     * click - the mark must not wave through some unrelated drop minutes later.
      */
-    private final Set<UUID> bypassNextDrop = new HashSet<>();
+    private final Set<UUID> bypassDropForTick = new HashSet<>();
+
+    /**
+     * Tick in which a player's inventory screen was closed. Closing throws out
+     * everything the screen was holding that has nowhere else to go: the cursor
+     * item, the 2x2 crafting grid, and the input slots of an anvil, grindstone or
+     * crafting table. Those arrive as PlayerDropItemEvents that never passed
+     * through an InventoryClickEvent, and are the drops {@link #onItemDrop} must
+     * not blindly cancel - see {@link #handleInventoryCloseDrop}. Unlike
+     * {@link #bypassDropForTick} this mark is not consumed by the first drop: one
+     * close can throw out the cursor item and several slots at once, and every one
+     * of them needs the same treatment.
+     */
+    private final Set<UUID> inventoryCloseForTick = new HashSet<>();
 
     public DropListener(Confirm2Drop plugin) {
         this.plugin = plugin;
@@ -113,17 +129,33 @@ public class DropListener implements Listener {
     }
 
     /**
-     * Handles ONLY the hotbar-Q-with-no-inventory-screen-open case; every drop
-     * that goes through an open inventory screen is intercepted earlier, in
-     * {@link #onInventoryClick}, and never reaches this handler as something
-     * still needing a confirmation decision (see {@link #bypassNextDrop}).
+     * Handles the drop paths that reach a PlayerDropItemEvent without a preceding
+     * InventoryClickEvent: pressing Q on the hotbar with no inventory screen open,
+     * and everything the server throws out when a screen is closed (see
+     * {@link #handleInventoryCloseDrop}). Drops made through an open inventory
+     * screen are intercepted earlier, in {@link #onInventoryClick}, and never
+     * reach this handler as something still needing a confirmation decision (see
+     * {@link #bypassDropForTick}).
+     * <p>
+     * Drops the server makes on the player's behalf are left strictly alone - see
+     * {@link #isServerDrivenDrop}.
      */
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
-        if (bypassNextDrop.remove(playerUUID)) {
+        if (isServerDrivenDrop(player)) {
+            debug("Leaving " + player.getName() + "'s server-driven drop untouched.");
+            return;
+        }
+
+        // Consumed unconditionally, so a mark can never be carried into a drop it
+        // was not meant for.
+        boolean alreadyConfirmed = bypassDropForTick.remove(playerUUID);
+        boolean thrownByInventoryClose = inventoryCloseForTick.contains(playerUUID);
+
+        if (alreadyConfirmed) {
             debug("Player " + player.getName() + "'s already-confirmed GUI drop is proceeding.");
             return;
         }
@@ -135,6 +167,11 @@ public class DropListener implements Listener {
         ItemStack item = event.getItemDrop().getItemStack();
         debug("Player " + player.getName() + " is trying to drop item: " + item.getType() + " x" + item.getAmount());
 
+        if (thrownByInventoryClose) {
+            handleInventoryCloseDrop(event, player, item);
+            return;
+        }
+
         int sourceSlot = player.getInventory().getHeldItemSlot();
 
         PendingHotbarDrop pending = pendingHotbarConfirmation.get(playerUUID);
@@ -145,13 +182,11 @@ public class DropListener implements Listener {
 
             if (sameSlot && sameItem && currentTime < pending.expiry) {
                 pendingHotbarConfirmation.remove(playerUUID);
-
-                if (isInventoryFull(player)) {
-                    dropItemToGround(player, item);
-                    event.getItemDrop().remove();
-                } else {
-                    debug("Player " + player.getName() + " confirmed the drop for item: " + item.getType());
-                }
+                // Nothing more to do: the event was never cancelled, so the item is
+                // already on its way to the ground. Spawning a copy and removing the
+                // original would lose it outright if anything cancelled the
+                // resulting ItemSpawnEvent.
+                debug("Player " + player.getName() + " confirmed the drop for item: " + item.getType());
                 return;
             } else {
                 debug("Player " + player.getName() + " attempted to drop a different item/slot. Resetting pending confirmation.");
@@ -234,6 +269,10 @@ public class DropListener implements Listener {
         // risk it being confirmed against a different container instance later.
         pendingGuiConfirmation.remove(playerUUID);
         cursorOrigin.remove(playerUUID);
+
+        // Fires before the server empties the screen out, so mark the player now
+        // for however many PlayerDropItemEvents that turns into.
+        markForThisTick(inventoryCloseForTick, playerUUID);
     }
 
     /**
@@ -284,7 +323,7 @@ public class DropListener implements Listener {
             if (sameSource && areItemsEqual(pending.item, item) && currentTime < pending.expiry) {
                 pendingGuiConfirmation.remove(playerUUID);
                 cursorOrigin.remove(playerUUID);
-                bypassNextDrop.add(playerUUID);
+                markForThisTick(bypassDropForTick, playerUUID);
                 debug("Player " + player.getName() + " confirmed the GUI drop for item: " + item.getType());
                 return;
             }
@@ -307,6 +346,104 @@ public class DropListener implements Listener {
         debug("Confirmation request sent to player " + player.getName() + " for item: " + item.getType()
                 + " in GUI slot " + sourceSlot + ". Timeout: " + timeoutSeconds + " seconds.");
         plugin.getManager(LocaleManager.class).sendMessage(player, "drop-confirmation-message");
+    }
+
+    /**
+     * Handles everything the server throws out when an inventory screen closes: the
+     * item left on the cursor, the 2x2 crafting grid, and the input slots of an
+     * anvil, grindstone, crafting table and friends.
+     * <p>
+     * Cancelling such a drop is only safe when the item can actually go back into
+     * the player's inventory. CraftBukkit restores a cancelled drop of this kind
+     * through {@code PlayerInventory#addItem} and throws the leftover away, so a
+     * full inventory means the item is destroyed rather than restored. Both
+     * sources reach that state routinely: picking an item onto the cursor frees its
+     * slot, a ground item is auto-picked into it, and the inventory is full again
+     * by closing time - while container input slots only ever spill onto the ground
+     * once {@code placeItemBackInInventory} has already found the inventory full.
+     * <p>
+     * With no room the drop is therefore left alone: the item lands on the ground,
+     * which is what vanilla would have done anyway, and stays recoverable.
+     */
+    private void handleInventoryCloseDrop(PlayerDropItemEvent event, Player player, ItemStack item) {
+        if (!shouldRequireConfirmation(item)) {
+            debug("No confirmation required for " + item.getType() + " thrown out on inventory close.");
+            return;
+        }
+
+        if (!canFitInInventory(player, item)) {
+            debug("Player " + player.getName() + "'s inventory has no room for " + item.getType()
+                    + "; letting it drop rather than cancelling into a silent deletion.");
+            plugin.getManager(LocaleManager.class).sendMessage(player, "inventory-full-drop-message");
+            return;
+        }
+
+        // The server's own restore puts it back; re-adding it here as well would
+        // duplicate it - see cancelAndRestore.
+        event.setCancelled(true);
+        debug("Player " + player.getName() + "'s protected item " + item.getType()
+                + " was returned to their inventory on inventory close.");
+    }
+
+    /**
+     * Whether the server is emptying the player out rather than the player throwing
+     * something away: death loot when keepInventory is off, and the cleanup that
+     * runs as someone disconnects.
+     * <p>
+     * Neither may be interfered with. Death loot has to reach the ground exactly as
+     * the server decided - cancelling any of it would both destroy the item, since
+     * the corpse's inventory is still full while the loot is thrown, and quietly
+     * rewrite the server's own death rules. A disconnecting player's inventory is
+     * on its way to disk, so nothing restored into it can be relied on either.
+     */
+    private boolean isServerDrivenDrop(Player player) {
+        return !player.isOnline() || player.isDead() || player.getHealth() <= 0.0D;
+    }
+
+    /**
+     * Marks a player in {@code marks} for the rest of the current tick only.
+     * <p>
+     * Everything these marks describe - a confirmed click and the drop it causes,
+     * a close and the items it throws out - happens inside a single tick, so the
+     * cleanup is simply the next tick's first task. Leaving a mark standing instead
+     * would mean a drop it was never meant for eventually inherits it.
+     * <p>
+     * {@code Bukkit.getCurrentTick()} would say the same thing without a task, but
+     * it is Paper-only; this works on Spigot too.
+     */
+    private void markForThisTick(Set<UUID> marks, UUID playerUUID) {
+        if (!plugin.isEnabled()) {
+            // Nothing could clear the mark again, so don't set one.
+            return;
+        }
+
+        if (marks.add(playerUUID)) {
+            Bukkit.getScheduler().runTask(plugin, () -> marks.remove(playerUUID));
+        }
+    }
+
+    /**
+     * Whether {@code item} fits entirely into the player's 36 storage slots,
+     * mirroring how {@code PlayerInventory#addItem} tops up matching stacks before
+     * using empty slots. Decides whether cancelling a cursor drop restores the item
+     * or silently destroys it.
+     */
+    private boolean canFitInInventory(Player player, ItemStack item) {
+        int remaining = item.getAmount();
+
+        for (ItemStack slot : player.getInventory().getStorageContents()) {
+            if (slot == null || slot.getType() == Material.AIR) {
+                remaining -= item.getMaxStackSize();
+            } else if (slot.isSimilar(item)) {
+                remaining -= Math.max(0, slot.getMaxStackSize() - slot.getAmount());
+            }
+
+            if (remaining <= 0) {
+                return true;
+            }
+        }
+
+        return remaining <= 0;
     }
 
     /**
@@ -337,16 +474,6 @@ public class DropListener implements Listener {
         resetPendingConfirmation(event.getPlayer());
     }
 
-
-    private boolean isInventoryFull(Player player) {
-        return player.getInventory().firstEmpty() == -1;
-    }
-
-    private void dropItemToGround(Player player, ItemStack item) {
-        player.getWorld().dropItemNaturally(player.getLocation(), item);
-        debug("Player " + player.getName() + "'s inventory is full. Dropped item " + item.getType() + " to the ground.");
-        plugin.getManager(LocaleManager.class).sendMessage(player, "inventory-full-drop-message");
-    }
 
     private void requestConfirmation(Player player, ItemStack item, int sourceSlot) {
         UUID playerUUID = player.getUniqueId();
@@ -432,7 +559,8 @@ public class DropListener implements Listener {
         pendingHotbarConfirmation.remove(playerUUID);
         pendingGuiConfirmation.remove(playerUUID);
         cursorOrigin.remove(playerUUID);
-        bypassNextDrop.remove(playerUUID);
+        bypassDropForTick.remove(playerUUID);
+        inventoryCloseForTick.remove(playerUUID);
         debug("Pending confirmation reset for player " + player.getName());
     }
 
